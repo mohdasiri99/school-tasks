@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة إدارة المهام المدرسية</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; }
+        .card { border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .hidden { display: none !important; }
+        .status-done { color: green; font-weight: bold; }
+        .status-progress { color: orange; font-weight: bold; }
+        .status-late { color: red; font-weight: bold; }
+        .navbar { background-color: #0d6efd; color: white; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark p-3">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">📚 منصة المهام المدرسية</span>
+            <button id="logoutBtn" class="btn btn-danger hidden" onclick="logout()">تسجيل الخروج</button>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        
+        <div id="loginSection" class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card p-4">
+                    <h3 class="text-center mb-4">تسجيل الدخول</h3>
+                    <div class="mb-3">
+                        <label class="form-label">رقم السجل المدني</label>
+                        <input type="text" id="idNumber" class="form-control" placeholder="أدخل رقم السجل المدني...">
+                        <small class="text-muted">للتجربة: ادخل "111" لمدير المدرسة، أو أي رقم آخر كمعلم.</small>
+                    </div>
+                    <button class="btn btn-primary w-100" onclick="login()">دخول</button>
+                    <p id="loginError" class="text-danger mt-2 hidden text-center">الرجاء إدخال رقم سجل مدني صحيح.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="principalSection" class="hidden">
+            <h2 class="mb-4">مرحباً بك، مدير المدرسة 👨‍💼</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card p-3">
+                        <h4>إسناد مهمة جديدة</h4>
+                        <input type="text" id="taskTitle" class="form-control mb-2" placeholder="عنوان المهمة">
+                        <input type="text" id="teacherId" class="form-control mb-2" placeholder="رقم سجل المعلم (مثال: 222)">
+                        <label>تاريخ البدء:</label>
+                        <input type="date" id="startDate" class="form-control mb-2">
+                        <label>تاريخ الانتهاء:</label>
+                        <input type="date" id="endDate" class="form-control mb-3">
+                        <button class="btn btn-success w-100" onclick="addTask()">إرسال المهمة</button>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card p-3">
+                        <h4>تقرير الإنجاز العام 📊</h4>
+                        <canvas id="tasksChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-3 mt-3">
+                <h4>متابعة المهام المسندة</h4>
+                <table class="table table-hover mt-2">
+                    <thead>
+                        <tr>
+                            <th>المهمة</th>
+                            <th>المعلم</th>
+                            <th>البداية</th>
+                            <th>النهاية</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="principalTasksTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="teacherSection" class="hidden">
+            <h2 class="mb-4">مرحباً بك، أيها المعلم الفاضل 👨‍🏫</h2>
+            <div class="card p-3">
+                <h4>المهام المسندة إليك</h4>
+                <table class="table table-hover mt-2">
+                    <thead>
+                        <tr>
+                            <th>المهمة</th>
+                            <th>البداية</th>
+                            <th>النهاية</th>
+                            <th>تحديث الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacherTasksTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // تهيئة البيانات
+        let tasks = JSON.parse(localStorage.getItem('schoolTasks')) || [];
+        let currentUser = null;
+        let chartInstance = null;
+
+        // دالة تسجيل الدخول
+        function login() {
+            const id = document.getElementById('idNumber').value;
+            if(!id) {
+                document.getElementById('loginError').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('loginError').classList.add('hidden');
+            currentUser = id;
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+
+            if(id === "111") {
+                // مدير المدرسة
+                document.getElementById('principalSection').classList.remove('hidden');
+                renderPrincipalDashboard();
+            } else {
+                // المعلم
+                document.getElementById('teacherSection').classList.remove('hidden');
+                renderTeacherDashboard();
+            }
+        }
+
+        // دالة تسجيل الخروج
+        function logout() {
+            currentUser = null;
+            document.getElementById('idNumber').value = "";
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('principalSection').classList.add('hidden');
+            document.getElementById('teacherSection').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+        }
+
+        // دالة إضافة مهمة (للمدير)
+        function addTask() {
+            const title = document.getElementById('taskTitle').value;
+            const tId = document.getElementById('teacherId').value;
+            const sDate = document.getElementById('startDate').value;
+            const eDate = document.getElementById('endDate').value;
+
+            if(!title || !tId || !sDate || !eDate) {
+                alert("الرجاء تعبئة جميع الحقول"); return;
+            }
+
+            const newTask = {
+                id: Date.now(),
+                title: title,
+                teacherId: tId,
+                startDate: sDate,
+                endDate: eDate,
+                status: "قيد العمل" // الحالة الافتراضية
+            };
+
+            tasks.push(newTask);
+            saveData();
+            renderPrincipalDashboard();
+            
+            // تفريغ الحقول
+            document.getElementById('taskTitle').value = "";
+            document.getElementById('teacherId').value = "";
+        }
+
+        // دالة تحديث حالة المهمة (للمعلم)
+        function updateStatus(taskId, newStatus) {
+            const task = tasks.find(t => t.id === taskId);
+            if(task) {
+                task.status = newStatus;
+                saveData();
+                renderTeacherDashboard();
+            }
+        }
+
+        // عرض لوحة المدير
+        function renderPrincipalDashboard() {
+            const tbody = document.getElementById('principalTasksTable');
+            tbody.innerHTML = "";
+            
+            let done = 0, progress = 0, late = 0;
+
+            tasks.forEach(t => {
+                let statusClass = t.status === "منجزة" ? "status-done" : (t.status === "قيد العمل" ? "status-progress" : "status-late");
+                
+                // حساب الإحصائيات للرسم البياني
+                if(t.status === "منجزة") done++;
+                else if(t.status === "قيد العمل") progress++;
+                else late++;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${t.title}</td>
+                        <td>${t.teacherId}</td>
+                        <td>${t.startDate}</td>
+                        <td>${t.endDate}</td>
+                        <td class="${statusClass}">${t.status}</td>
+                    </tr>
+                `;
+            });
+
+            updateChart(done, progress, late);
+        }
+
+        // عرض لوحة المعلم
+        function renderTeacherDashboard() {
+            const tbody = document.getElementById('teacherTasksTable');
+            tbody.innerHTML = "";
+            const myTasks = tasks.filter(t => t.teacherId === currentUser);
+
+            myTasks.forEach(t => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${t.title}</td>
+                        <td>${t.startDate}</td>
+                        <td>${t.endDate}</td>
+                        <td>
+                            <select class="form-select" onchange="updateStatus(${t.id}, this.value)">
+                                <option value="قيد العمل" ${t.status === 'قيد العمل' ? 'selected' : ''}>قيد العمل ⏳</option>
+                                <option value="منجزة" ${t.status === 'منجزة' ? 'selected' : ''}>منجزة ✅</option>
+                                <option value="متأخرة" ${t.status === 'متأخرة' ? 'selected' : ''}>متأخرة / غير منجزة ❌</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // تحديث الرسم البياني
+        function updateChart(done, progress, late) {
+            const ctx = document.getElementById('tasksChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['منجزة ✅', 'قيد العمل ⏳', 'متأخرة ❌'],
+                    datasets: [{
+                        label: 'عدد المهام',
+                        data: [done, progress, late],
+                        backgroundColor: ['#198754', '#ffc107', '#dc3545'],
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+        }
+
+        // حفظ البيانات في المتصفح
+        function saveData() {
+            localStorage.setItem('schoolTasks', JSON.stringify(tasks));
+        }
+    </script>
+</body>
+</html>
