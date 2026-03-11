@@ -3,113 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة إدارة المهام المدرسية</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>منصة ارتقاء لإدارة المهام</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; }
-        .card { border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .navbar-custom {
+            background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .navbar-brand { font-weight: 700; font-size: 1.5rem; }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        .card:hover { transform: translateY(-3px); }
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #e3e6f0;
+            font-weight: 600;
+            border-radius: 12px 12px 0 0 !important;
+        }
+        .stat-card { color: #fff; border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
+        .stat-icon { position: absolute; left: 20px; top: 20px; font-size: 3rem; opacity: 0.3; }
+        .bg-primary-custom { background: linear-gradient(45deg, #4e73df, #224abe); }
+        .bg-success-custom { background: linear-gradient(45deg, #1cc88a, #13855c); }
+        .bg-warning-custom { background: linear-gradient(45deg, #f6c23e, #dda20a); }
+        .bg-danger-custom { background: linear-gradient(45deg, #e74a3b, #be2617); }
+        .table-custom th { background-color: #f8f9fc; color: #4e73df; font-weight: 700; border-top: none; }
+        .table-custom td { vertical-align: middle; }
         .hidden { display: none !important; }
-        .status-done { color: green; font-weight: bold; }
-        .status-progress { color: orange; font-weight: bold; }
-        .status-late { color: red; font-weight: bold; }
-        .navbar { background-color: #0d6efd; color: white; }
+        .login-container { min-height: 80vh; display: flex; align-items: center; justify-content: center; }
+        .btn-custom { border-radius: 8px; font-weight: 600; padding: 10px; }
+        .form-control, .form-select { border-radius: 8px; padding: 10px; }
+        .form-control:focus, .form-select:focus { border-color: #4e73df; box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25); }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark p-3">
-        <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">📚 منصة المهام المدرسية</span>
-            <button id="logoutBtn" class="btn btn-danger hidden" onclick="logout()">تسجيل الخروج</button>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom p-3">
+        <div class="container">
+            <span class="navbar-brand"><i class="fa-solid fa-graduation-cap me-2"></i> منصة ارتقاء لإدارة المهام</span>
+            <button id="logoutBtn" class="btn btn-light btn-sm fw-bold hidden" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج
+            </button>
         </div>
     </nav>
 
-    <div class="container mt-5">
+    <div class="container mt-5 mb-5">
         
-        <div id="loginSection" class="row justify-content-center">
+        <div id="loginSection" class="login-container">
             <div class="col-md-5">
-                <div class="card p-4">
-                    <h3 class="text-center mb-4">تسجيل الدخول</h3>
-                    <div class="mb-3">
-                        <label class="form-label">رقم السجل المدني</label>
-                        <input type="text" id="idNumber" class="form-control" placeholder="أدخل رقم السجل المدني...">
-                        <small class="text-muted">للتجربة: ادخل "111" لمدير المدرسة، أو أي رقم آخر كمعلم.</small>
+                <div class="card p-5 text-center">
+                    <div class="mb-4 text-primary">
+                        <i class="fa-solid fa-user-shield fa-4x mb-3" style="color: #4e73df;"></i>
+                        <h3 class="fw-bold">بوابة الدخول</h3>
                     </div>
-                    <button class="btn btn-primary w-100" onclick="login()">دخول</button>
-                    <p id="loginError" class="text-danger mt-2 hidden text-center">الرجاء إدخال رقم سجل مدني صحيح.</p>
+                    <div class="mb-4 text-start">
+                        <label class="form-label fw-bold text-secondary">رقم السجل المدني</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fa-solid fa-id-card text-muted"></i></span>
+                            <input type="text" id="idNumber" class="form-control" placeholder="أدخل رقمك للوصول...">
+                        </div>
+                        <small class="text-muted d-block mt-2"><i class="fa-solid fa-circle-info"></i> للتجربة: أدخل <strong>111</strong> للمدير، أو أي رقم كمعلم.</small>
+                    </div>
+                    <button class="btn btn-primary w-100 btn-custom" onclick="login()" style="background-color: #4e73df; border:none;">
+                        دخول إلى النظام <i class="fa-solid fa-arrow-left ms-1"></i>
+                    </button>
+                    <p id="loginError" class="text-danger mt-3 hidden fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> الرجاء إدخال رقم سجل صحيح.</p>
                 </div>
             </div>
         </div>
 
         <div id="principalSection" class="hidden">
-            <h2 class="mb-4">مرحباً بك، مدير المدرسة 👨‍💼</h2>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card p-3">
-                        <h4>إسناد مهمة جديدة</h4>
-                        <input type="text" id="taskTitle" class="form-control mb-2" placeholder="عنوان المهمة">
-                        <input type="text" id="teacherId" class="form-control mb-2" placeholder="رقم سجل المعلم (مثال: 222)">
-                        <label>تاريخ البدء:</label>
-                        <input type="date" id="startDate" class="form-control mb-2">
-                        <label>تاريخ الانتهاء:</label>
-                        <input type="date" id="endDate" class="form-control mb-3">
-                        <button class="btn btn-success w-100" onclick="addTask()">إرسال المهمة</button>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-dark"><i class="fa-solid fa-chart-line text-primary me-2"></i> لوحة قيادة مدير المدرسة</h2>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stat-card bg-primary-custom shadow">
+                        <div class="stat-icon"><i class="fa-solid fa-list-check"></i></div>
+                        <h5>إجمالي المهام</h5>
+                        <h2 class="fw-bold mb-0" id="totalCount">0</h2>
                     </div>
                 </div>
-                <div class="col-md-8">
-                    <div class="card p-3">
-                        <h4>تقرير الإنجاز العام 📊</h4>
-                        <canvas id="tasksChart" height="100"></canvas>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stat-card bg-success-custom shadow">
+                        <div class="stat-icon"><i class="fa-solid fa-check-double"></i></div>
+                        <h5>المهام المنجزة</h5>
+                        <h2 class="fw-bold mb-0" id="doneCount">0</h2>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stat-card bg-warning-custom shadow">
+                        <div class="stat-icon"><i class="fa-solid fa-spinner"></i></div>
+                        <h5>قيد العمل</h5>
+                        <h2 class="fw-bold mb-0" id="progressCount">0</h2>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stat-card bg-danger-custom shadow">
+                        <div class="stat-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                        <h5>متأخرة / غير منجزة</h5>
+                        <h2 class="fw-bold mb-0" id="lateCount">0</h2>
                     </div>
                 </div>
             </div>
-            <div class="card p-3 mt-3">
-                <h4>متابعة المهام المسندة</h4>
-                <table class="table table-hover mt-2">
-                    <thead>
-                        <tr>
-                            <th>المهمة</th>
-                            <th>المعلم</th>
-                            <th>البداية</th>
-                            <th>النهاية</th>
-                            <th>الحالة</th>
-                        </tr>
-                    </thead>
-                    <tbody id="principalTasksTable"></tbody>
-                </table>
+
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header"><i class="fa-solid fa-plus-circle text-success me-1"></i> إسناد مهمة جديدة</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label text-secondary fw-bold">عنوان المهمة</label>
+                                <input type="text" id="taskTitle" class="form-control" placeholder="مثال: إعداد خطة علاجية">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-secondary fw-bold">رقم سجل المعلم</label>
+                                <input type="text" id="teacherId" class="form-control" placeholder="مثال: 222">
+                            </div>
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label class="form-label text-secondary fw-bold">تاريخ البدء</label>
+                                    <input type="date" id="startDate" class="form-control">
+                                </div>
+                                <div class="col-6 mb-4">
+                                    <label class="form-label text-secondary fw-bold">تاريخ الانتهاء</label>
+                                    <input type="date" id="endDate" class="form-control">
+                                </div>
+                            </div>
+                            <button class="btn btn-success btn-custom w-100" onclick="addTask()"><i class="fa-solid fa-paper-plane"></i> إرسال المهمة للمعلم</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header"><i class="fa-solid fa-chart-pie text-primary me-1"></i> المؤشر البياني للإنجاز</div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <canvas id="tasksChart" style="max-height: 250px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><i class="fa-solid fa-table-list text-secondary me-1"></i> سجل المهام المتابعة</div>
+                <div class="card-body table-responsive">
+                    <table class="table table-hover table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>المهمة</th>
+                                <th>المعلم (رقم السجل)</th>
+                                <th>تاريخ البدء</th>
+                                <th>تاريخ الانتهاء</th>
+                                <th>حالة الإنجاز</th>
+                            </tr>
+                        </thead>
+                        <tbody id="principalTasksTable"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <div id="teacherSection" class="hidden">
-            <h2 class="mb-4">مرحباً بك، أيها المعلم الفاضل 👨‍🏫</h2>
-            <div class="card p-3">
-                <h4>المهام المسندة إليك</h4>
-                <table class="table table-hover mt-2">
-                    <thead>
-                        <tr>
-                            <th>المهمة</th>
-                            <th>البداية</th>
-                            <th>النهاية</th>
-                            <th>تحديث الحالة</th>
-                        </tr>
-                    </thead>
-                    <tbody id="teacherTasksTable"></tbody>
-                </table>
+            <h2 class="fw-bold text-dark mb-4"><i class="fa-solid fa-chalkboard-user text-primary me-2"></i> مساحة عمل المعلم</h2>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header"><i class="fa-solid fa-list-ol text-secondary me-1"></i> المهام المسندة إليك من الإدارة</div>
+                <div class="card-body table-responsive">
+                    <table class="table table-hover table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>وصف المهمة</th>
+                                <th>تاريخ البدء</th>
+                                <th>الموعد النهائي</th>
+                                <th width="200">تحديث الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacherTasksTable"></tbody>
+                    </table>
+                    <div id="noTasksMsg" class="text-center text-muted my-4 hidden">
+                        <i class="fa-solid fa-mug-hot fa-3x mb-3 text-light"></i>
+                        <h5>لا توجد مهام مسندة إليك حالياً. عمل رائع!</h5>
+                    </div>
+                </div>
             </div>
         </div>
 
     </div>
 
     <script>
-        // تهيئة البيانات
-        let tasks = JSON.parse(localStorage.getItem('schoolTasks')) || [];
+        let tasks = JSON.parse(localStorage.getItem('schoolTasksV2')) || [];
         let currentUser = null;
         let chartInstance = null;
 
-        // دالة تسجيل الدخول
+        function getBadge(status) {
+            if(status === "منجزة") return `<span class="badge bg-success p-2"><i class="fa-solid fa-check"></i> منجزة</span>`;
+            if(status === "قيد العمل") return `<span class="badge bg-warning text-dark p-2"><i class="fa-solid fa-spinner fa-spin"></i> قيد العمل</span>`;
+            return `<span class="badge bg-danger p-2"><i class="fa-solid fa-xmark"></i> متأخرة</span>`;
+        }
+
         function login() {
-            const id = document.getElementById('idNumber').value;
+            const id = document.getElementById('idNumber').value.trim();
             if(!id) {
                 document.getElementById('loginError').classList.remove('hidden');
                 return;
@@ -120,17 +226,14 @@
             document.getElementById('logoutBtn').classList.remove('hidden');
 
             if(id === "111") {
-                // مدير المدرسة
                 document.getElementById('principalSection').classList.remove('hidden');
                 renderPrincipalDashboard();
             } else {
-                // المعلم
                 document.getElementById('teacherSection').classList.remove('hidden');
                 renderTeacherDashboard();
             }
         }
 
-        // دالة تسجيل الخروج
         function logout() {
             currentUser = null;
             document.getElementById('idNumber').value = "";
@@ -140,7 +243,6 @@
             document.getElementById('logoutBtn').classList.add('hidden');
         }
 
-        // دالة إضافة مهمة (للمدير)
         function addTask() {
             const title = document.getElementById('taskTitle').value;
             const tId = document.getElementById('teacherId').value;
@@ -148,28 +250,21 @@
             const eDate = document.getElementById('endDate').value;
 
             if(!title || !tId || !sDate || !eDate) {
-                alert("الرجاء تعبئة جميع الحقول"); return;
+                alert("الرجاء تعبئة جميع الحقول بشكل صحيح."); return;
             }
 
             const newTask = {
-                id: Date.now(),
-                title: title,
-                teacherId: tId,
-                startDate: sDate,
-                endDate: eDate,
-                status: "قيد العمل" // الحالة الافتراضية
+                id: Date.now(), title, teacherId: tId, startDate: sDate, endDate: eDate, status: "قيد العمل"
             };
 
             tasks.push(newTask);
             saveData();
             renderPrincipalDashboard();
             
-            // تفريغ الحقول
             document.getElementById('taskTitle').value = "";
             document.getElementById('teacherId').value = "";
         }
 
-        // دالة تحديث حالة المهمة (للمعلم)
         function updateStatus(taskId, newStatus) {
             const task = tasks.find(t => t.id === taskId);
             if(task) {
@@ -179,82 +274,94 @@
             }
         }
 
-        // عرض لوحة المدير
         function renderPrincipalDashboard() {
             const tbody = document.getElementById('principalTasksTable');
             tbody.innerHTML = "";
-            
             let done = 0, progress = 0, late = 0;
 
             tasks.forEach(t => {
-                let statusClass = t.status === "منجزة" ? "status-done" : (t.status === "قيد العمل" ? "status-progress" : "status-late");
-                
-                // حساب الإحصائيات للرسم البياني
                 if(t.status === "منجزة") done++;
                 else if(t.status === "قيد العمل") progress++;
                 else late++;
 
                 tbody.innerHTML += `
                     <tr>
-                        <td>${t.title}</td>
-                        <td>${t.teacherId}</td>
-                        <td>${t.startDate}</td>
-                        <td>${t.endDate}</td>
-                        <td class="${statusClass}">${t.status}</td>
+                        <td class="fw-bold text-dark">${t.title}</td>
+                        <td><span class="badge bg-light text-dark border"><i class="fa-solid fa-user text-secondary"></i> ${t.teacherId}</span></td>
+                        <td class="text-secondary">${t.startDate}</td>
+                        <td class="text-secondary">${t.endDate}</td>
+                        <td>${getBadge(t.status)}</td>
                     </tr>
                 `;
             });
+
+            document.getElementById('totalCount').innerText = tasks.length;
+            document.getElementById('doneCount').innerText = done;
+            document.getElementById('progressCount').innerText = progress;
+            document.getElementById('lateCount').innerText = late;
 
             updateChart(done, progress, late);
         }
 
-        // عرض لوحة المعلم
         function renderTeacherDashboard() {
             const tbody = document.getElementById('teacherTasksTable');
+            const noTasksMsg = document.getElementById('noTasksMsg');
             tbody.innerHTML = "";
+            
             const myTasks = tasks.filter(t => t.teacherId === currentUser);
 
-            myTasks.forEach(t => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${t.title}</td>
-                        <td>${t.startDate}</td>
-                        <td>${t.endDate}</td>
-                        <td>
-                            <select class="form-select" onchange="updateStatus(${t.id}, this.value)">
-                                <option value="قيد العمل" ${t.status === 'قيد العمل' ? 'selected' : ''}>قيد العمل ⏳</option>
-                                <option value="منجزة" ${t.status === 'منجزة' ? 'selected' : ''}>منجزة ✅</option>
-                                <option value="متأخرة" ${t.status === 'متأخرة' ? 'selected' : ''}>متأخرة / غير منجزة ❌</option>
-                            </select>
-                        </td>
-                    </tr>
-                `;
-            });
+            if(myTasks.length === 0) {
+                noTasksMsg.classList.remove('hidden');
+            } else {
+                noTasksMsg.classList.add('hidden');
+                myTasks.forEach(t => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="fw-bold">${t.title}</td>
+                            <td class="text-secondary">${t.startDate}</td>
+                            <td class="text-secondary">${t.endDate}</td>
+                            <td>
+                                <select class="form-select form-select-sm border-${t.status === 'منجزة' ? 'success' : (t.status === 'قيد العمل' ? 'warning' : 'danger')} fw-bold" onchange="updateStatus(${t.id}, this.value)">
+                                    <option value="قيد العمل" ${t.status === 'قيد العمل' ? 'selected' : ''}>⏳ قيد العمل</option>
+                                    <option value="منجزة" ${t.status === 'منجزة' ? 'selected' : ''}>✅ منجزة</option>
+                                    <option value="متأخرة" ${t.status === 'متأخرة' ? 'selected' : ''}>❌ متأخرة</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
         }
 
-        // تحديث الرسم البياني
         function updateChart(done, progress, late) {
             const ctx = document.getElementById('tasksChart').getContext('2d');
             if(chartInstance) chartInstance.destroy();
             
+            // تغيير نوع الرسم البياني ليكون Doughnut ليعطي شكلاً احترافياً
             chartInstance = new Chart(ctx, {
-                type: 'bar',
+                type: 'doughnut',
                 data: {
-                    labels: ['منجزة ✅', 'قيد العمل ⏳', 'متأخرة ❌'],
+                    labels: ['منجزة', 'قيد العمل', 'متأخرة'],
                     datasets: [{
-                        label: 'عدد المهام',
                         data: [done, progress, late],
-                        backgroundColor: ['#198754', '#ffc107', '#dc3545'],
-                        borderWidth: 1
+                        backgroundColor: ['#1cc88a', '#f6c23e', '#e74a3b'],
+                        hoverOffset: 4,
+                        borderWidth: 0
                     }]
                 },
-                options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Cairo' } } }
+                    },
+                    cutout: '70%'
+                }
             });
         }
 
-        // حفظ البيانات في المتصفح
         function saveData() {
-            localStorage.setItem('schoolTasks', JSON.stringify(tasks));
+            localStorage.setItem('schoolTasksV2', JSON.stringify(tasks));
         }
     </script>
 </body>
