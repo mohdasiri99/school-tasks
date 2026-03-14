@@ -3,257 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة إرتقاء المستقرة | V7.1</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Amiri:wght@700&display=swap" rel="stylesheet">
+    <title>إرتقاء Pro | الإصدار 11</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBy8glojqDAbRqvVnVDDXNhfeGRADEiT108",
+            authDomain: "erteqasystem.firebaseapp.com",
+            projectId: "erteqasystem",
+            storageBucket: "erteqasystem.appspot.com",
+            messagingSenderId: "333276685848",
+            appId: "1:333276685848:web:758209930f9a2e1d73a702"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.db = db; window.tasksRef = collection(db, "tasks");
+        window.onSnapshot = onSnapshot; window.updateDoc = updateDoc;
+        window.doc = doc; window.addDoc = addDoc;
+    </script>
+
     <style>
-        :root { --gold: #d4af37; --royal: #1e3c72; }
-        body { font-family: 'Cairo', sans-serif; background-color: #f8f9fa; overflow-x: hidden; }
-        
-        /* تثبيت الهوية */
-        .navbar-custom { background: #1a1a1a; border-bottom: 3px solid var(--gold); }
+        :root { --dark: #0f172a; --gold: #fbbf24; --glass: rgba(30, 41, 59, 0.7); }
+        body { font-family: 'Cairo', sans-serif; background: var(--dark); color: #e2e8f0; min-height: 100vh; overflow-x: hidden; }
         .hidden { display: none !important; }
+
+        /* Sidebar Style */
+        .sidebar { background: rgba(0,0,0,0.3); border-left: 1px solid rgba(255,255,255,0.1); height: 100vh; position: fixed; right: 0; width: 250px; padding: 20px; }
+        .main-content { margin-right: 250px; padding: 30px; }
+
+        /* Login Card */
+        .login-box { background: var(--glass); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); padding: 40px; margin-top: 15vh; }
+
+        /* Dashboard Cards */
+        .card-pro { background: var(--glass); border-radius: 15px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; transition: 0.3s; }
+        .card-pro:hover { transform: translateY(-5px); border-color: var(--gold); }
         
-        /* منع اهتزاز الصفحة */
-        .chart-container { position: relative; height: 300px; width: 100%; margin-bottom: 20px; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: none; }
-        
-        /* النجوم */
-        .star-rating i { cursor: pointer; color: #ddd; margin: 0 2px; transition: color 0.2s; }
-        .star-rating i.active { color: var(--gold); }
-        
-        /* الشهادة المصممة للطباعة */
-        #certificate {
-            width: 800px; padding: 50px; background: white; border: 15px double var(--gold);
-            margin: 50px auto; text-align: center; display: none;
+        /* Task Status Colors */
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .delayed { border: 2px solid #ef4444 !important; animation: pulse-red 2s infinite; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+
+        /* Certificate Landscape Fix */
+        #certificate { 
+            width: 1000px; height: 700px; background: white; color: black; 
+            border: 20px double var(--gold); padding: 50px; text-align: center; 
+            display: none; position: relative; margin: 20px auto; 
         }
-        
+
         @media print {
+            @page { size: landscape; }
             body * { display: none !important; }
-            #certificate { display: block !important; position: absolute; top: 0; left: 0; right: 0; }
+            #certificate { display: block !important; width: 100%; height: 100%; border: 10px double var(--gold); }
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-dark navbar-custom p-3 no-print">
-        <div class="container d-flex justify-content-between">
-            <span class="navbar-brand fw-bold"><i class="fa-solid fa-shield-heart me-2 text-warning"></i> منصة إرتقاء الرقمية</span>
-            <button id="logoutBtn" class="btn btn-sm btn-outline-warning hidden" onclick="location.reload()">خروج آمن</button>
+<div id="loginSection" class="container text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-5 login-box shadow-lg">
+            <i class="fas fa-shield-halved fa-4x text-warning mb-4"></i>
+            <h2 class="fw-bold mb-4">نظام إرتقاء السحابي</h2>
+            <input type="text" id="userInput" class="form-control form-control-lg bg-dark text-white border-0 mb-3 text-center" placeholder="الاسم أو السجل المدني">
+            <button class="btn btn-warning btn-lg w-100 fw-bold" onclick="handleLogin()">دخول آمن</button>
         </div>
-    </nav>
+    </div>
+</div>
 
-    <div class="container mt-4">
-        
-        <div id="loginSection" class="row justify-content-center py-5">
-            <div class="col-md-5 mt-5">
-                <div class="card p-5 text-center shadow-lg">
-                    <h3 class="fw-bold mb-4">تسجيل الدخول</h3>
-                    <input type="text" id="idInput" class="form-control form-control-lg text-center mb-3" placeholder="أدخل رقم السجل المدني">
-                    <button class="btn btn-primary btn-lg w-100" onclick="handleLogin()">دخول</button>
-                    <div class="mt-3 small text-muted">المدير: 111 | المعلم: 222</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="principalSection" class="hidden">
-            <div class="row mb-4 align-items-center">
-                <div class="col-md-6"><h3>لوحة التحكم الإدارية</h3></div>
-                <div class="col-md-6 text-end">
-                    <button class="btn btn-dark" onclick="window.print()"><i class="fa-solid fa-print"></i> طباعة التقرير</button>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="card p-4 mb-4">
-                        <h6 class="fw-bold mb-3">مؤشر أداء المعلمين (نقاط التقييم)</h6>
-                        <div class="chart-container">
-                            <canvas id="principalChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="card p-4">
-                        <h6 class="fw-bold mb-3">سجل المتابعة والتقييم</h6>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr><th>المهمة</th><th>المعلم</th><th>الشواهد</th><th>التقييم</th><th>ملاحظات</th></tr>
-                                </thead>
-                                <tbody id="pTableBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card p-4 mb-4 bg-light">
-                        <h6 class="fw-bold mb-3">إسناد مهمة جديدة</h6>
-                        <input type="text" id="taskTitle" class="form-control mb-2" placeholder="عنوان المهمة">
-                        <input type="text" id="teacherId" class="form-control mb-2" placeholder="رقم سجل المعلم">
-                        <input type="date" id="endDate" class="form-control mb-3">
-                        <button class="btn btn-primary w-100" onclick="addNewTask()">إرسال التكليف</button>
-                    </div>
-                    <div class="card p-4">
-                        <h6 class="fw-bold text-center mb-3"><i class="fa-solid fa-trophy text-warning"></i> لوحة المتفوقين</h6>
-                        <div id="leaderboardArea"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="teacherSection" class="hidden">
-            <div class="d-flex justify-content-between mb-4">
-                <h3 id="teacherWelcome">أهلاً بك</h3>
-                <div id="rewardZone"></div>
-            </div>
-            <div class="card p-4 shadow-sm">
-                <table class="table align-middle">
-                    <thead><tr><th>المهمة</th><th>الموعد</th><th>تحديث الإنجاز</th><th>رابط الشاهد</th><th>التقييم</th></tr></thead>
-                    <tbody id="tTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
+<div id="dashboardSection" class="hidden">
+    <div class="sidebar">
+        <h3 class="fw-bold text-warning mb-5">إرتقاء Pro</h3>
+        <nav class="nav flex-column gap-3">
+            <button class="btn btn-outline-light text-start border-0" onclick="showTab('main')"><i class="fas fa-home me-2"></i> لوحة التحكم</button>
+            <button class="btn btn-outline-light text-start border-0" onclick="showTab('school')"><i class="fas fa-chart-line me-2"></i> نتائج المدرسة</button>
+            <button class="btn btn-outline-danger text-start border-0 mt-5" onclick="location.reload()"><i class="fas fa-power-off me-2"></i> خروج</button>
+        </nav>
     </div>
 
-    <div id="certificate">
-        <h1>شهادة شكر وتقدير</h1>
-        <div style="font-size: 24px; margin: 40px 0;">
-            تمنح إدارة المنصة هذه الشهادة للمعلم صاحب السجل: <br>
-            <strong id="certName" style="color:var(--royal); font-size: 35px;"></strong><br>
-            لتميزه في إنجاز المهام والحصول على التقييم الكامل 5 نجوم.
-        </div>
-        <div class="mt-5">قائد المدرسة: .....................</div>
-    </div>
-
-    <script>
-        let tasks = JSON.parse(localStorage.getItem('schoolCore_V8')) || [];
-        let currentUser = null;
-        let pChart = null;
-
-        // وظائف الدخول الآمن
-        function handleLogin() {
-            const id = document.getElementById('idInput').value.trim();
-            if(!id) return;
-            currentUser = id;
+    <div class="main-content">
+        <div id="tab-main">
+            <h2 id="welcomeText" class="mb-4 fw-bold"></h2>
             
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('logoutBtn').classList.remove('hidden');
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div id="adminPanel" class="card-pro hidden">
+                        <h6 class="text-warning mb-3">إسناد مهمة جديدة</h6>
+                        <div class="row g-2">
+                            <div class="col-md-4"><input type="text" id="tTitle" class="form-control" placeholder="عنوان المهمة"></div>
+                            <div class="col-md-3"><input type="text" id="tTeacher" class="form-control" placeholder="اسم المعلم"></div>
+                            <div class="col-md-3"><input type="date" id="tDate" class="form-control"></div>
+                            <div class="col-md-2"><button class="btn btn-warning w-100" onclick="addTask()">نشر</button></div>
+                        </div>
+                    </div>
 
-            if(id === "111") {
-                document.getElementById('principalSection').classList.remove('hidden');
-                renderPrincipal();
-            } else {
-                document.getElementById('teacherSection').classList.remove('hidden');
-                document.getElementById('teacherWelcome').innerText = "لوحة المعلم: " + id;
-                renderTeacher();
-            }
-        }
+                    <h5 class="mb-3">قائمة المهام والنشاط</h5>
+                    <div id="taskList"></div>
+                </div>
 
-        // وظائف المدير
-        function addNewTask() {
-            const title = document.getElementById('taskTitle').value;
-            const tId = document.getElementById('teacherId').value;
-            const date = document.getElementById('endDate').value;
-            if(!title || !tId) return;
+                <div class="col-lg-4">
+                    <div class="card-pro text-center">
+                        <h6 class="mb-4 text-muted">إحصائيات الإنجاز</h6>
+                        <div class="d-flex justify-content-around mb-4">
+                            <div><h2 id="doneCount" class="text-warning">0</h2><small>تم</small></div>
+                            <div><h2 id="starCount" class="text-info">0</h2><small>نجوم</small></div>
+                        </div>
+                        <div id="certBtn" class="hidden animate__animated animate__bounceIn">
+                            <button class="btn btn-warning w-100 py-3 fw-bold" onclick="generateCert()">🏆 طباعة شهادة التميز</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            tasks.push({ id: Date.now(), title, teacherId: tId, endDate: date, status: "قيد العمل", rating: 0, feedback: "", evidence: "" });
-            save(); renderPrincipal();
-            document.getElementById('taskTitle').value = "";
-        }
+        <div id="tab-school" class="hidden">
+            <h2 class="mb-5 fw-bold text-info">نتائج المدرسة العامة</h2>
+            <div class="row g-4 text-center">
+                <div class="col-md-4"><div class="card-pro"><h6>إجمالي المهام</h6><h1 id="sTotal">0</h1></div></div>
+                <div class="col-md-4"><div class="card-pro"><h6>نسبة الإنجاز</h6><h1 id="sRate" class="text-success">0%</h1></div></div>
+                <div class="col-md-4"><div class="card-pro"><h6>متأخرة</h6><h1 id="sDelay" class="text-danger">0</h1></div></div>
+            </div>
+        </div>
+    </div>
+</div>
 
-        function setRating(taskId, stars) {
-            const task = tasks.find(t => t.id === taskId);
-            if(task) {
-                task.rating = stars;
-                save(); renderPrincipal();
-            }
-        }
+<div id="certificate">
+    <div style="border: 10px double #fbbf24; height: 100%; padding: 30px;">
+        <h1 style="font-size: 60px; color: #1e293b;">شهادة شكر وتقدير</h1>
+        <p style="font-size: 25px; margin-top: 20px;">تمنح إدارة المنصة هذه الشهادة للأستاذ المبدع:</p>
+        <h2 id="certName" style="font-size: 50px; color: #fbbf24; margin: 30px 0;"></h2>
+        <p style="font-size: 22px;">تقديراً لسرعة إنجازه للمهام المسندة إليه وتميزه في الأداء السحابي.</p>
+        <div style="margin-top: 50px; display: flex; justify-content: space-around; font-weight: bold;">
+            <span>الختم الرسمي <br> 💠</span>
+            <span>تاريخ الإصدار <br> <span id="certDate"></span></span>
+        </div>
+        <button class="btn btn-dark mt-5 no-print" onclick="window.print()">تأكيد الطباعة</button>
+    </div>
+</div>
 
-        function renderPrincipal() {
-            const tbody = document.getElementById('pTableBody');
-            tbody.innerHTML = "";
-            let stats = {};
+<script type="module">
+    let user = "";
+    window.handleLogin = function() {
+        user = document.getElementById('userInput').value.trim();
+        if(!user) return;
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('dashboardSection').classList.remove('hidden');
+        document.getElementById('welcomeText').innerText = "أهلاً بك، " + user;
+        if(user === "111") document.getElementById('adminPanel').classList.remove('hidden');
+        startSync();
+    }
 
-            tasks.forEach(t => {
-                if(t.status === "منجزة") stats[t.teacherId] = (stats[t.teacherId] || 0) + t.rating;
+    window.showTab = function(tab) {
+        document.getElementById('tab-main').classList.add('hidden');
+        document.getElementById('tab-school').classList.add('hidden');
+        document.getElementById('tab-' + tab).classList.remove('hidden');
+    }
 
-                let starsHtml = `<div class="star-rating">`;
-                for(let i=1; i<=5; i++) {
-                    starsHtml += `<i class="fa-solid fa-star ${i <= t.rating ? 'active' : ''}" onclick="setRating(${t.id}, ${i})"></i>`;
+    function startSync() {
+        window.onSnapshot(window.tasksRef, (snap) => {
+            const list = document.getElementById('taskList');
+            list.innerHTML = "";
+            let done=0, stars=0, sTotal=0, sDone=0, sDelay=0;
+
+            snap.forEach(docSnap => {
+                const d = docSnap.data();
+                const id = docSnap.id;
+                const isLate = new Date(d.date) < new Date() && d.status !== "منجزة";
+
+                sTotal++;
+                if(d.status === "منجزة") sDone++;
+                if(isLate) sDelay++;
+
+                if(user === "111" || d.teacherId === user) {
+                    if(d.teacherId === user) {
+                        if(d.status === "منجزة") done++;
+                        if(d.rating === 5) stars++;
+                    }
+
+                    list.innerHTML += `
+                        <div class="card-pro ${isLate ? 'delayed' : ''}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">${d.title} ${isLate ? '<i class="fas fa-clock text-danger ms-2"></i>' : ''}</h5>
+                                    <small class="text-muted">المعلم: ${d.teacherId} | التاريخ: ${d.date}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="status-badge ${d.status==='منجزة'?'bg-success':'bg-warning text-dark'}">${d.status}</span>
+                                    <div class="mt-2 text-warning">${'★'.repeat(d.rating)}</div>
+                                </div>
+                            </div>
+                            ${d.feedback ? `<div class="mt-3 p-2 bg-white bg-opacity-5 rounded small">💬 ${d.feedback}</div>` : ''}
+                            ${user === "111" ? `<div class="mt-3">
+                                <input id="f-${id}" class="form-control form-control-sm bg-dark text-white mb-2" placeholder="ملاحظات المدير">
+                                <button class="btn btn-sm btn-success me-2" onclick="saveF('${id}')">حفظ</button>
+                                <button class="btn btn-sm btn-info" onclick="rate('${id}')">تقييم 5 نجوم</button>
+                            </div>` : `<button class="btn btn-sm btn-outline-warning mt-3" onclick="setDone('${id}')">تم الإنجاز</button>`}
+                        </div>`;
                 }
-                starsHtml += `</div>`;
-
-                tbody.innerHTML += `<tr>
-                    <td>${t.title}</td><td>${t.teacherId}</td>
-                    <td>${t.evidence ? `<a href="${t.evidence}" target="_blank" class="btn btn-xs btn-outline-primary">عرض</a>` : '-'}</td>
-                    <td>${starsHtml}</td>
-                    <td><input class="form-control form-control-sm" value="${t.feedback}" onblur="tasks.find(x=>x.id==${t.id}).feedback=this.value; save();"></td>
-                </tr>`;
             });
-            updateChart(stats);
-            updateLeaderboard(stats);
-        }
+            document.getElementById('doneCount').innerText = done;
+            document.getElementById('starCount').innerText = stars;
+            document.getElementById('sTotal').innerText = sTotal;
+            document.getElementById('sDelay').innerText = sDelay;
+            document.getElementById('sRate').innerText = Math.round((sDone/sTotal)*100 || 0) + "%";
+            if(stars >= 3) document.getElementById('certBtn').classList.remove('hidden');
+        });
+    }
 
-        // وظائف المعلم
-        function renderTeacher() {
-            const tbody = document.getElementById('tTableBody');
-            tbody.innerHTML = "";
-            const myTasks = tasks.filter(t => t.teacherId === currentUser);
-            let starsCount = 0;
-
-            myTasks.forEach(t => {
-                if(t.rating === 5) starsCount++;
-                tbody.innerHTML += `<tr>
-                    <td>${t.title}</td><td>${t.endDate}</td>
-                    <td><select class="form-select form-select-sm" onchange="tasks.find(x=>x.id==${t.id}).status=this.value; save(); renderTeacher();">
-                        <option value="قيد العمل" ${t.status === 'قيد العمل' ? 'selected' : ''}>⏳ قيد العمل</option>
-                        <option value="منجزة" ${t.status === 'منجزة' ? 'selected' : ''}>✅ تم الإنجاز</option>
-                    </select></td>
-                    <td><input class="form-control form-control-sm" placeholder="رابط..." value="${t.evidence}" onblur="tasks.find(x=>x.id==${t.id}).evidence=this.value; save();"></td>
-                    <td class="text-warning">${'<i class="fa-solid fa-star"></i>'.repeat(t.rating)}</td>
-                </tr>`;
-            });
-
-            const rewardZone = document.getElementById('rewardZone');
-            if(starsCount >= 3) {
-                rewardZone.innerHTML = `<button class="btn btn-warning fw-bold shadow" onclick="printCert()">🏆 استلام الشهادة</button>`;
-            } else {
-                rewardZone.innerHTML = `<span class="badge bg-light text-dark">بانتظار ${3 - starsCount} مهام بـ 5 نجوم للشهادة</span>`;
-            }
-        }
-
-        // أدوات النظام
-        function updateChart(stats) {
-            const ctx = document.getElementById('principalChart').getContext('2d');
-            if(pChart) pChart.destroy();
-            pChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(stats),
-                    datasets: [{ label: 'مجموع النقاط', data: Object.values(stats), backgroundColor: '#1e3c72' }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        function updateLeaderboard(stats) {
-            const area = document.getElementById('leaderboardArea');
-            area.innerHTML = "";
-            const sorted = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0, 3);
-            sorted.forEach((s, i) => {
-                area.innerHTML += `<div class="p-2 border-bottom small">#${i+1} المعلم: ${s[0]} - (${s[1]} نقطة)</div>`;
-            });
-        }
-
-        function printCert() {
-            document.getElementById('certName').innerText = currentUser;
-            window.print();
-        }
-
-        function save() { localStorage.setItem('schoolCore_V8', JSON.stringify(tasks)); }
-    </script>
+    window.addTask = async function() {
+        const t = document.getElementById('tTitle').value;
+        const n = document.getElementById('tTeacher').value;
+        const d = document.getElementById('tDate').value;
+        if(t && n) await window.addDoc(window.tasksRef, { title:t, teacherId:n, date:d, status:"قيد العمل", rating:0, feedback:"" });
+    }
+    window.setDone = async function(id) { await window.updateDoc(window.doc(window.db, "tasks", id), { status: "منجزة" }); }
+    window.rate = async function(id) { await window.updateDoc(window.doc(window.db, "tasks", id), { rating: 5 }); }
+    window.saveF = async function(id) {
+        const val = document.getElementById('f-'+id).value;
+        await window.updateDoc(window.doc(window.db, "tasks", id), { feedback: val });
+    }
+    window.generateCert = function() {
+        document.getElementById('certName').innerText = user;
+        document.getElementById('certDate').innerText = new Date().toLocaleDateString('ar-SA');
+        document.getElementById('dashboardSection').classList.add('hidden');
+        document.getElementById('certificate').style.display = 'block';
+    }
+</script>
 </body>
 </html>
